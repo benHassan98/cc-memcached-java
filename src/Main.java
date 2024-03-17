@@ -5,27 +5,39 @@ import java.util.Optional;
 
 public class Main {
 
+
+    public static boolean validateArgs(String[] args) {
+        int validCnt = 0;
+
+        var argList = Arrays.asList(args);
+        int portIndex = argList.indexOf("-p");
+        int sizeIndex = argList.indexOf("-m");
+
+        if(portIndex != -1 && portIndex + 1 < argList.size()){
+            validCnt += 2;
+        }
+
+        if(sizeIndex != -1 && sizeIndex + 1 < argList.size()){
+            validCnt += 2;
+        }
+
+
+        return argList.size() == validCnt;
+    }
+
     public static Optional<Integer> getPort(String[] args){
 
 
         int portIndex = Arrays.asList(args).indexOf("-p");
         if(portIndex != -1 ){
 
-
-            if(portIndex + 1 < args.length){
-
-                try{
-                   Integer port = Integer.parseInt(args[portIndex + 1]);
-                   return Optional.of(port);
-                }
-                catch (NumberFormatException e){
-                    return Optional.empty();
-                }
-
-
+            try{
+                Integer port = Integer.parseInt(args[portIndex + 1]);
+                return Optional.of(port);
             }
-
-            return Optional.empty();
+            catch (NumberFormatException e){
+                return Optional.empty();
+            }
         }
 
         return Optional.of(11211);
@@ -37,21 +49,14 @@ public class Main {
         int sizeIndex = Arrays.asList(args).indexOf("-m");
         if(sizeIndex != -1 ){
 
-
-            if(sizeIndex + 1 < args.length){
-
-                try{
-                    Long size = Long.getLong(args[sizeIndex + 1]) * 1024L;
-                    return Optional.of(size);
-                }
-                catch (NumberFormatException e){
-                    return Optional.empty();
-                }
-
-
+            try{
+                Long size = Long.getLong(args[sizeIndex + 1]) * 1024L;
+                return Optional.of(size);
+            }
+            catch (NumberFormatException e){
+                return Optional.empty();
             }
 
-            return Optional.empty();
         }
 
         return Optional.of(1024L);
@@ -59,6 +64,12 @@ public class Main {
     }
 
     public static void main(String[] args){
+        var argsValid = validateArgs(args);
+
+        if(!argsValid){
+            System.out.println("Unspecified Arguments");
+            return;
+        }
 
         var port = getPort(args);
         var cacheSize = getCacheSizeInBytes(args);
