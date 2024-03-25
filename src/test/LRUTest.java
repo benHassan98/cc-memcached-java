@@ -16,6 +16,7 @@ public class LRUTest {
 
         DataRecord dataRecord = new DataRecord(CommandType.SET,
                 "Hello",
+                null,
                 0L,
                 0L,
                 0L,
@@ -36,6 +37,7 @@ public class LRUTest {
 
         DataRecord dataRecord1 = new DataRecord(CommandType.SET,
                 "key1",
+                null,
                 0L,
                 0L,
                 0L,
@@ -44,6 +46,7 @@ public class LRUTest {
 
         DataRecord dataRecord2 = new DataRecord(CommandType.SET,
                 "key2",
+                null,
                 0L,
                 0L,
                 0L,
@@ -69,6 +72,7 @@ public class LRUTest {
 
         DataRecord dataRecord1 = new DataRecord(CommandType.SET,
                 "key1",
+                null,
                 0L,
                 0L,
                 0L,
@@ -77,6 +81,7 @@ public class LRUTest {
 
         DataRecord dataRecord2 = new DataRecord(CommandType.SET,
                 "key2",
+                null,
                 0L,
                 0L,
                 0L,
@@ -86,7 +91,7 @@ public class LRUTest {
         boolean isAdded1 = lru.add(dataRecord1);
         boolean isAdded2 = lru.add(dataRecord2);
 
-        lru.increment("key1");
+        lru.promote("key1");
 
         var lastAddedRecord = lru.get();
 
@@ -104,6 +109,7 @@ public class LRUTest {
 
         DataRecord dataRecord1 = new DataRecord(CommandType.SET,
                 "key1",
+                null,
                 0L,
                 0L,
                 0L,
@@ -112,6 +118,7 @@ public class LRUTest {
 
         DataRecord dataRecord2 = new DataRecord(CommandType.SET,
                 "key2",
+                null,
                 0L,
                 0L,
                 0L,

@@ -3,96 +3,42 @@ package lru;
 import record.DataRecord;
 
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.*;
+
 
 public class LRU {
-    private final TreeMap<Long, DataRecord> dataRecordMap = new TreeMap<>();
-    private final HashMap<String, Long> keyMap = new HashMap<>();
-    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
-    private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
-    private final ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
+    private final LinkedList<String> keyList = new LinkedList<>();
+    private final HashMap<String, DataRecord> dataRecordMap = new HashMap<>();
 
     public boolean add(DataRecord dataRecord){
 
-        writeLock.lock();
-
-        Long THRESHOLD = (long) 1e10;
-        Long index = (long) dataRecordMap.size() > 0 ? dataRecordMap.lastKey() + 1 : 0;
-
-        keyMap.put(dataRecord.key(), index);
-        dataRecordMap.put(index, dataRecord);
+        keyList.addFirst(dataRecord.key());
+        dataRecordMap.put(dataRecord.key(), dataRecord);
 
 
-        if(dataRecordMap.lastKey() >= THRESHOLD){
-            CompletableFuture.runAsync(this::compressIndices);
-        }
-        
-        
-        writeLock.unlock();
-        
         return true;
     }
 
-    public void increment(String key){
+    public void promote(String key){
 
-        writeLock.lock();
+        keyList.remove(key);
+        keyList.addFirst(key);
 
-        var oldIndex = keyMap.get(key);
-        keyMap.remove(key);
-
-        var dataRecord = dataRecordMap.get(oldIndex);
-        dataRecordMap.remove(oldIndex);
-
-        this.add(dataRecord);
-
-        writeLock.unlock();
     }
 
     public DataRecord get(){
-
-        readLock.lock();
-
-        var value = dataRecordMap.firstEntry().getValue();
-
-        readLock.unlock();
-
-        return value;
+        return dataRecordMap.get(keyList.getLast());
     }
 
     public DataRecord delete(){
 
-        writeLock.lock();
+        String key = keyList.removeLast();
 
-        var entry = dataRecordMap.firstEntry();
-
-        keyMap.remove(entry.getValue().key());
-        dataRecordMap.remove(entry.getKey());
-
-        writeLock.unlock();
-
-        return entry.getValue();
+        return dataRecordMap.remove(key);
     }
 
-    private void compressIndices(){
-
-        var valueCollection = dataRecordMap.values().stream().toList();
-
-        keyMap.clear();
-        dataRecordMap.clear();
-
-        valueCollection.forEach(dataRecord -> {
-
-            keyMap.put(dataRecord.key(), (long) dataRecordMap.size());
-            dataRecordMap.put((long) dataRecordMap.size(), dataRecord);
-            
-        });
-
+    public boolean isEmpty(){
+        return dataRecordMap.isEmpty();
     }
-
     
 }
