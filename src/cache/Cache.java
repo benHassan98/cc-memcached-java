@@ -99,13 +99,13 @@ public class Cache {
                         )
         );
     }
-    public void delete(String key){
+    public boolean delete(String key){
 
         writeLock.lock();
 
         if(!dataRecordContainer.containsKey(key)){
             writeLock.unlock();
-            return;
+            return false;
         }
 
         var dataRecord = this.dataRecordContainer.remove(key);
@@ -114,6 +114,8 @@ public class Cache {
         this.releaseId(dataRecord.casKey());
 
         writeLock.unlock();
+
+        return true;
 
     }
     private Long generateId(){
@@ -171,7 +173,6 @@ public class Cache {
         var newId = generateId();
         var expTime = dataRecord.expTime() == -1 ? dataRecord.expTime() : dataRecord.expTime() * 1000L;
         var savedRecord = new DataRecord(
-                dataRecord.commandType(),
                 dataRecord.key(),
                 newId,
                 dataRecord.flags(),

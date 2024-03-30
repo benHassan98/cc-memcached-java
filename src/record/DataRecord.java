@@ -1,9 +1,7 @@
 package record;
 
-import enums.CommandType;
 
-public record DataRecord(CommandType commandType,
-                         String key,
+public record DataRecord(String key,
                          Long casKey,
                          Long flags,
                          Long expTime,

@@ -1,6 +1,6 @@
 package test;
 
-import enums.CommandType;
+
 import lru.LRU;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -14,7 +14,7 @@ public class LRUTest {
 
         LRU lru = new LRU();
 
-        DataRecord dataRecord = new DataRecord(CommandType.SET,
+        DataRecord dataRecord = new DataRecord(
                 "Hello",
                 null,
                 0L,
@@ -35,7 +35,7 @@ public class LRUTest {
 
         LRU lru = new LRU();
 
-        DataRecord dataRecord1 = new DataRecord(CommandType.SET,
+        DataRecord dataRecord1 = new DataRecord(
                 "key1",
                 null,
                 0L,
@@ -44,7 +44,7 @@ public class LRUTest {
                 false,
                 "World");
 
-        DataRecord dataRecord2 = new DataRecord(CommandType.SET,
+        DataRecord dataRecord2 = new DataRecord(
                 "key2",
                 null,
                 0L,
@@ -70,7 +70,7 @@ public class LRUTest {
 
         LRU lru = new LRU();
 
-        DataRecord dataRecord1 = new DataRecord(CommandType.SET,
+        DataRecord dataRecord1 = new DataRecord(
                 "key1",
                 null,
                 0L,
@@ -79,7 +79,7 @@ public class LRUTest {
                 false,
                 "World");
 
-        DataRecord dataRecord2 = new DataRecord(CommandType.SET,
+        DataRecord dataRecord2 = new DataRecord(
                 "key2",
                 null,
                 0L,
@@ -107,7 +107,7 @@ public class LRUTest {
 
         LRU lru = new LRU();
 
-        DataRecord dataRecord1 = new DataRecord(CommandType.SET,
+        DataRecord dataRecord1 = new DataRecord(
                 "key1",
                 null,
                 0L,
@@ -116,7 +116,7 @@ public class LRUTest {
                 false,
                 "World");
 
-        DataRecord dataRecord2 = new DataRecord(CommandType.SET,
+        DataRecord dataRecord2 = new DataRecord(
                 "key2",
                 null,
                 0L,

@@ -1,7 +1,6 @@
 package test;
 
 import cache.Cache;
-import enums.CommandType;
 import org.junit.Test;
 import record.DataRecord;
 
@@ -13,7 +12,7 @@ public class CacheTest {
     @Test
     public void addTest(){
         Cache cache = new Cache(10L);
-        DataRecord dataRecord = new DataRecord(CommandType.SET,
+        DataRecord dataRecord = new DataRecord(
                 "key",
                 null,
                 0L,
@@ -33,7 +32,7 @@ public class CacheTest {
     @Test
     public void setTest(){
         Cache cache = new Cache(10L);
-        DataRecord dataRecord = new DataRecord(CommandType.SET,
+        DataRecord dataRecord = new DataRecord(
                 "key",
                 null,
                 0L,
@@ -53,7 +52,7 @@ public class CacheTest {
     @Test
     public void getTest(){
         Cache cache = new Cache(10L);
-        DataRecord dataRecord = new DataRecord(CommandType.SET,
+        DataRecord dataRecord = new DataRecord(
                 "key",
                 null,
                 0L,
@@ -74,7 +73,7 @@ public class CacheTest {
     @Test
     public void deleteTest(){
         Cache cache = new Cache(10L);
-        DataRecord dataRecord = new DataRecord(CommandType.SET,
+        DataRecord dataRecord = new DataRecord(
                 "key",
                 null,
                 0L,
@@ -83,11 +82,12 @@ public class CacheTest {
                 false,
                 "World");
         cache.set(dataRecord);
-        cache.delete(dataRecord.key());
+        boolean isDeleted = cache.delete(dataRecord.key());
 
         boolean addedRecord = cache.getByKey(dataRecord.key()).isEmpty();
 
         assertTrue(addedRecord);
+        assertTrue(isDeleted);
 
 
     }
