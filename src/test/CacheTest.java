@@ -54,7 +54,7 @@ public class CacheTest {
         Cache cache = new Cache(10L);
         DataRecord dataRecord = new DataRecord(
                 "key",
-                null,
+                "",
                 0L,
                 0L,
                 5L,
@@ -62,7 +62,7 @@ public class CacheTest {
                 "World");
         cache.set(dataRecord);
         DataRecord addedRecord1 = cache.getByKey(dataRecord.key()).get();
-        DataRecord addedRecord2 = cache.getByCasKey(0L).get();
+        DataRecord addedRecord2 = cache.getByCasKey("").get();
 
 
         assertEquals(addedRecord1.key(), dataRecord.key());
@@ -92,6 +92,13 @@ public class CacheTest {
 
     }
 
+    @Test
+    public void updateTest(){
 
+
+
+
+
+    }
 
 }

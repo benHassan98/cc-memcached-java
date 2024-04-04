@@ -2,7 +2,7 @@ package record;
 
 
 public record DataRecord(String key,
-                         Long casKey,
+                         String casKey,
                          Long flags,
                          Long expTime,
                          Long byteCount,

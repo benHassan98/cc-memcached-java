@@ -4,8 +4,9 @@ import lru.LRU;
 import record.DataRecord;
 
 
+
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
@@ -18,43 +19,37 @@ public class Cache {
     private final ConcurrentHashMap<String, DataRecord> dataRecordContainer = new ConcurrentHashMap<>();
     private final PriorityQueue<DataRecord> dataRecordPriorityQueue = new PriorityQueue<>(Comparator.comparing(DataRecord::expTime));
     private final LRU lru = new LRU();
-    private final PriorityQueue<Long> idQueue = new PriorityQueue<>();
-    private final List<DataRecord> dataRecordList = new ArrayList<>();
+    private final ConcurrentHashMap<String, DataRecord> dataRecordIdContainer = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
     private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
-    private final ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
+    private final ReentrantReadWriteLock priorityQueueReadWriteLock = new ReentrantReadWriteLock(true);
+    private final ReentrantReadWriteLock.WriteLock priorityQueueWriteLock = priorityQueueReadWriteLock.writeLock();
     public Cache(Long size){
         this.size = size;
         this.freeSpace = new AtomicLong(size);
+
+        new ScheduledThreadPoolExecutor(2).
+                scheduleWithFixedDelay(this::claimSpaceFromExpiredData,
+                        1000,
+                        1000,
+                        TimeUnit.MICROSECONDS);
+
     }
 
     public void set(DataRecord dataRecord){
 
-        writeLock.lock();
-
         this.delete(dataRecord.key());
 
-        DataRecord savedRecord = saveRecord(dataRecord);
+        dataRecordContainer.put(dataRecord.key(), this.saveRecord(dataRecord));
 
-        writeLock.unlock();
-
-        dataRecordContainer.put(savedRecord.key(), savedRecord);
     }
     public boolean add(DataRecord dataRecord){
 
-        writeLock.lock();
-
         if(dataRecordContainer.containsKey(dataRecord.key())){
-            writeLock.unlock();
             return false;
         }
 
-        DataRecord savedRecord = saveRecord(dataRecord);
-
-        writeLock.unlock();
-
-        dataRecordContainer.putIfAbsent(savedRecord.key(), savedRecord);
-
+        dataRecordContainer.putIfAbsent(dataRecord.key(), this.saveRecord(dataRecord));
         return true;
 
 
@@ -65,24 +60,24 @@ public class Cache {
             return Optional.empty();
         }
 
+        lru.promote(key);
+
         return Optional.ofNullable(
-                this.dataRecordContainer.computeIfPresent(key, (k,v)->v)
+                this.dataRecordContainer.computeIfPresent(key, (k,v)-> v)
         );
 
     }
-    public Optional<DataRecord> getByCasKey(Long casKey){
+    public Optional<DataRecord> getByCasKey(String casKey){
 
         if(this.deleteByCasKeyIfExpired(casKey)){
             return Optional.empty();
         }
 
-        readLock.lock();
-
         var val = Optional.ofNullable(
-                casKey >= 0 && casKey < this.dataRecordList.size()?this.dataRecordList.get(casKey.intValue()):null
+                dataRecordIdContainer.computeIfPresent(casKey, (k, v)->v)
         );
 
-        readLock.unlock();
+        val.ifPresent((v)->lru.promote( v.key() ) );
 
         return val;
     }
@@ -92,11 +87,34 @@ public class Cache {
             return Optional.empty();
         }
 
+        BiFunction<String, DataRecord, DataRecord> callbackFun =  (k, v)->{
+
+            var newDataRecord = dataRecordBiFunction.apply(k, v);
+
+            this.freeSpace.updateAndGet((curr)->{
+
+                long newVal = curr + v.byteCount();
+
+                if(newVal < newDataRecord.byteCount()){
+                    Long target = newDataRecord.byteCount() - newVal;
+                    newVal += this.claimSpaceWithEviction(target);
+                }
+                newVal -= newDataRecord.byteCount();
+                return newVal;
+            });
+
+
+            return newDataRecord;
+        };
+
+
+        lru.promote(key);
+
         return Optional.ofNullable(
                 this.dataRecordContainer.computeIfPresent(
                         key,
-                        dataRecordBiFunction
-                        )
+                        callbackFun
+                )
         );
     }
     public boolean delete(String key){
@@ -109,46 +127,21 @@ public class Cache {
         }
 
         var dataRecord = this.dataRecordContainer.remove(key);
-        this.dataRecordList.set(dataRecord.casKey().intValue(), null);
+        this.dataRecordIdContainer.remove(dataRecord.casKey());
         this.freeSpace.addAndGet(dataRecord.byteCount());
-        this.releaseId(dataRecord.casKey());
 
         writeLock.unlock();
 
         return true;
 
     }
-    private Long generateId(){
-
-
-        return idQueue.isEmpty()? this.dataRecordList.size(): idQueue.poll();
-
-    }
-    private void releaseId(long id){
-
-        idQueue.add(id);
-
-    }
-
-    private Long claimSpace(Long target){
+    private Long claimSpaceWithEviction(Long target){
 
         long claimedSpace = 0;
-        Long currTime = new Date().getTime();
-        while(!dataRecordPriorityQueue.isEmpty() && dataRecordPriorityQueue.peek().expTime() <= currTime && target > 0){
-
-            var dataRecord = dataRecordPriorityQueue.poll();
-            if(dataRecordContainer.containsKey(dataRecord.key())){
-                claimedSpace += dataRecord.byteCount();
-                target -= dataRecord.byteCount();
-                dataRecordContainer.remove(dataRecord.key());
-            }
-
-        }
-
 
         while(!lru.isEmpty() && target > 0){
 
-            var dataRecord = lru.delete();
+            var dataRecord = lru.evict();
             if(dataRecordContainer.containsKey(dataRecord.key())){
                 claimedSpace += dataRecord.byteCount();
                 target -= dataRecord.byteCount();
@@ -160,18 +153,52 @@ public class Cache {
         return claimedSpace;
     }
 
-    private DataRecord saveRecord(DataRecord dataRecord){
+    private void claimSpaceFromExpiredData(){
 
-        if(this.freeSpace.get() < dataRecord.byteCount()){
-            Long target = dataRecord.byteCount() - this.freeSpace.get();
-            this.freeSpace.addAndGet(this.claimSpace(target));
+        long claimedSpace = 0;
+        Long currTime = new Date().getTime();
+
+        priorityQueueWriteLock.lock();
+
+        while(!dataRecordPriorityQueue.isEmpty() && dataRecordPriorityQueue.peek().expTime() <= currTime){
+
+            var polledRecord = dataRecordPriorityQueue.poll();
+            var savedRecordOptional = Optional.ofNullable(
+                    dataRecordContainer.computeIfPresent(polledRecord.key(), (k, v)->v)
+            );
+            if(savedRecordOptional.isPresent() && savedRecordOptional.get().casKey().equals(polledRecord.casKey())   ){
+                claimedSpace += polledRecord.byteCount();
+                this.delete(polledRecord.key());
+            }
 
         }
 
-        this.freeSpace.set(this.freeSpace.get() - dataRecord.byteCount());
+        priorityQueueWriteLock.unlock();
 
-        var newId = generateId();
-        var expTime = dataRecord.expTime() == -1 ? dataRecord.expTime() : dataRecord.expTime() * 1000L;
+        this.freeSpace.addAndGet(claimedSpace);
+
+
+    }
+
+
+    private DataRecord saveRecord(DataRecord dataRecord){
+
+        this.freeSpace.updateAndGet((curr)->{
+
+            long newVal = curr;
+
+            if(curr < dataRecord.byteCount()){
+                Long target = dataRecord.byteCount() - curr;
+                newVal = curr + this.claimSpaceWithEviction(target);
+            }
+            newVal -= dataRecord.byteCount();
+            return newVal;
+        });
+
+
+
+        var newId = UUID.randomUUID().toString();
+        var expTime = dataRecord.expTime() * 1000L;
         var savedRecord = new DataRecord(
                 dataRecord.key(),
                 newId,
@@ -182,16 +209,15 @@ public class Cache {
                 dataRecord.data()
         );
 
-        if(savedRecord.expTime() != 1){
+        dataRecordIdContainer.putIfAbsent(newId, savedRecord);
+
+        priorityQueueWriteLock.lock();
+
+        if(savedRecord.expTime() > 0){
             dataRecordPriorityQueue.add(savedRecord);
         }
 
-        if(newId == this.dataRecordList.size()){
-            this.dataRecordList.add(savedRecord);
-        }
-        else {
-            this.dataRecordList.set(newId.intValue(), savedRecord);
-        }
+        priorityQueueWriteLock.unlock();
 
         lru.add(savedRecord);
 
@@ -216,24 +242,20 @@ public class Cache {
         return false;
     }
 
-    private boolean deleteByCasKeyIfExpired(Long casKey){
+    private boolean deleteByCasKeyIfExpired(String casKey){
 
         writeLock.lock();
 
-        if(casKey < 0 || casKey >= this.dataRecordList.size() ||
-                Objects.isNull(this.dataRecordList.get(casKey.intValue())) ||
-                ! this.isExpired(this.dataRecordList.get(casKey.intValue()))
+        var record = this.dataRecordIdContainer.get(casKey);
 
-        ){
+        if(this.isExpired(record)){
+            this.delete(record.key());
             writeLock.unlock();
-            return false;
+            return true;
         }
 
-        this.delete(this.dataRecordList.get(casKey.intValue()).key());
-
         writeLock.unlock();
-
-        return true;
+        return false;
     }
 
     public Long getSize(){
