@@ -139,11 +139,22 @@ public class Parser {
 
         }
 
-        String casKey = "";
+        long casKey = 0;
 
         if("cas".equals(commandName)){
 
-            casKey = args[ argsIndx-- ];
+            try{
+                casKey = Long.parseLong(args[ argsIndx-- ]);
+            }
+            catch (NumberFormatException exception){
+                throw new Exception("Please enter an unique_cas_key(number)");
+            }
+
+            if(casKey < 0){
+                throw new Exception("Please enter a positive unique_cas_key ");
+            }
+
+
 
         }
 

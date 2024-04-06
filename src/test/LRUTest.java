@@ -20,7 +20,6 @@ public class LRUTest {
                 0L,
                 0L,
                 0L,
-                false,
                 "World");
 
 
@@ -41,7 +40,6 @@ public class LRUTest {
                 0L,
                 0L,
                 0L,
-                false,
                 "World");
 
         DataRecord dataRecord2 = new DataRecord(
@@ -50,7 +48,6 @@ public class LRUTest {
                 0L,
                 0L,
                 0L,
-                false,
                 "World");
 
         boolean isAdded1 = lru.add(dataRecord1);
@@ -76,7 +73,6 @@ public class LRUTest {
                 0L,
                 0L,
                 0L,
-                false,
                 "World");
 
         DataRecord dataRecord2 = new DataRecord(
@@ -85,7 +81,6 @@ public class LRUTest {
                 0L,
                 0L,
                 0L,
-                false,
                 "World");
 
         boolean isAdded1 = lru.add(dataRecord1);
@@ -113,7 +108,6 @@ public class LRUTest {
                 0L,
                 0L,
                 0L,
-                false,
                 "World");
 
         DataRecord dataRecord2 = new DataRecord(
@@ -122,7 +116,6 @@ public class LRUTest {
                 0L,
                 0L,
                 0L,
-                false,
                 "World");
 
         boolean isAdded1 = lru.add(dataRecord1);
@@ -130,7 +123,7 @@ public class LRUTest {
 
 
 
-        var lastAddedRecord = lru.delete();
+        var lastAddedRecord = lru.evict();
 
         assertTrue(isAdded1);
         assertTrue(isAdded2);

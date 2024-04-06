@@ -7,7 +7,7 @@ import java.util.List;
 public record CommandRecord(CommandType commandType,
                             String key,
                             List<String> keyList,
-                            String casKey,
+                            Long casKey,
                             Long flags,
                             Long expTime,
                             Long byteCount,

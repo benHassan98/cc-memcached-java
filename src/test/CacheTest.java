@@ -4,8 +4,10 @@ import cache.Cache;
 import org.junit.Test;
 import record.DataRecord;
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CacheTest {
 
@@ -18,10 +20,9 @@ public class CacheTest {
                 0L,
                 0L,
                 5L,
-                false,
                 "World");
         boolean isAdded = cache.add(dataRecord);
-        DataRecord addedRecord = cache.getByKey(dataRecord.key()).get();
+        DataRecord addedRecord = cache.get(dataRecord.key()).get();
 
         assertTrue(isAdded);
         assertEquals(addedRecord.key(), dataRecord.key());
@@ -38,10 +39,9 @@ public class CacheTest {
                 0L,
                 0L,
                 5L,
-                false,
                 "World");
         cache.set(dataRecord);
-        DataRecord addedRecord = cache.getByKey(dataRecord.key()).get();
+        DataRecord addedRecord = cache.get(dataRecord.key()).get();
 
 
         assertEquals(addedRecord.key(), dataRecord.key());
@@ -54,19 +54,18 @@ public class CacheTest {
         Cache cache = new Cache(10L);
         DataRecord dataRecord = new DataRecord(
                 "key",
-                "",
+                null,
                 0L,
                 0L,
                 5L,
-                false,
                 "World");
         cache.set(dataRecord);
-        DataRecord addedRecord1 = cache.getByKey(dataRecord.key()).get();
-        DataRecord addedRecord2 = cache.getByCasKey("").get();
+        DataRecord addedRecord = cache.get(dataRecord.key()).get();
 
 
-        assertEquals(addedRecord1.key(), dataRecord.key());
-        assertEquals(addedRecord2.key(), dataRecord.key());
+
+        assertEquals(addedRecord.key(), dataRecord.key());
+
 
     }
 
@@ -79,12 +78,11 @@ public class CacheTest {
                 0L,
                 0L,
                 5L,
-                false,
                 "World");
         cache.set(dataRecord);
         boolean isDeleted = cache.delete(dataRecord.key());
 
-        boolean addedRecord = cache.getByKey(dataRecord.key()).isEmpty();
+        boolean addedRecord = cache.get(dataRecord.key()).isEmpty();
 
         assertTrue(addedRecord);
         assertTrue(isDeleted);
@@ -95,10 +93,49 @@ public class CacheTest {
     @Test
     public void updateTest(){
 
+        Cache cache = new Cache(10L);
+        DataRecord dataRecord = new DataRecord(
+                "key",
+                null,
+                0L,
+                0L,
+                5L,
+                "World");
 
+        long delta = 5;
 
+        cache.add(dataRecord);
+        assertThrows(RuntimeException.class, ()->
+                cache.update("key", (k, v)-> new DataRecord(
+                        k,
+                        null,
+                        0L,
+                        0L,
+                        (long) Long.valueOf(Long.parseLong(v.data()) + delta).toString().length(),
+                        Long.valueOf(Long.parseLong(v.data()) + delta).toString()
+                ))
+        );
 
+        var res = cache.update("key", (k, v)-> new DataRecord(
+                k,
+                null,
+                0L,
+                0L,
+                5L,
+                "Hello"
+        ));
+
+        assertEquals(res.get().key(), dataRecord.key());
+        assertEquals(res.get().data(), "Hello");
 
     }
+
+    @Test
+    public void concurrentTest(){
+
+    }
+
+
+
 
 }

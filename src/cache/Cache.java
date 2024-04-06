@@ -17,18 +17,19 @@ public class Cache {
     private final Long size;
     private final AtomicLong freeSpace;
     private final ConcurrentHashMap<String, DataRecord> dataRecordContainer = new ConcurrentHashMap<>();
-    private final PriorityQueue<DataRecord> dataRecordPriorityQueue = new PriorityQueue<>(Comparator.comparing(DataRecord::expTime));
-    private final LRU lru = new LRU();
-    private final ConcurrentHashMap<String, DataRecord> dataRecordIdContainer = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
     private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
+    private final PriorityQueue<DataRecord> dataRecordPriorityQueue = new PriorityQueue<>(Comparator.comparing(DataRecord::expTime));
     private final ReentrantReadWriteLock priorityQueueReadWriteLock = new ReentrantReadWriteLock(true);
     private final ReentrantReadWriteLock.WriteLock priorityQueueWriteLock = priorityQueueReadWriteLock.writeLock();
+    private final LRU lru = new LRU();
+
+
     public Cache(Long size){
         this.size = size;
         this.freeSpace = new AtomicLong(size);
 
-        new ScheduledThreadPoolExecutor(2).
+        new ScheduledThreadPoolExecutor(1).
                 scheduleWithFixedDelay(this::claimSpaceFromExpiredData,
                         1000,
                         1000,
@@ -54,7 +55,7 @@ public class Cache {
 
 
     }
-    public Optional<DataRecord> getByKey(String key){
+    public Optional<DataRecord> get(String key){
 
         if(this.deleteByKeyIfExpired(key)){
             return Optional.empty();
@@ -66,20 +67,6 @@ public class Cache {
                 this.dataRecordContainer.computeIfPresent(key, (k,v)-> v)
         );
 
-    }
-    public Optional<DataRecord> getByCasKey(String casKey){
-
-        if(this.deleteByCasKeyIfExpired(casKey)){
-            return Optional.empty();
-        }
-
-        var val = Optional.ofNullable(
-                dataRecordIdContainer.computeIfPresent(casKey, (k, v)->v)
-        );
-
-        val.ifPresent((v)->lru.promote( v.key() ) );
-
-        return val;
     }
     public Optional<DataRecord> update(String key, BiFunction<String, DataRecord, DataRecord> dataRecordBiFunction){
 
@@ -127,7 +114,6 @@ public class Cache {
         }
 
         var dataRecord = this.dataRecordContainer.remove(key);
-        this.dataRecordIdContainer.remove(dataRecord.casKey());
         this.freeSpace.addAndGet(dataRecord.byteCount());
 
         writeLock.unlock();
@@ -197,19 +183,16 @@ public class Cache {
 
 
 
-        var newId = UUID.randomUUID().toString();
+
         var expTime = dataRecord.expTime() * 1000L;
         var savedRecord = new DataRecord(
                 dataRecord.key(),
-                newId,
+                1L,
                 dataRecord.flags(),
                 expTime,
                 dataRecord.byteCount(),
-                dataRecord.reply(),
                 dataRecord.data()
         );
-
-        dataRecordIdContainer.putIfAbsent(newId, savedRecord);
 
         priorityQueueWriteLock.lock();
 
@@ -234,22 +217,6 @@ public class Cache {
 
         if(this.isExpired(this.dataRecordContainer.get(key))){
             this.delete(key);
-            writeLock.unlock();
-            return true;
-        }
-
-        writeLock.unlock();
-        return false;
-    }
-
-    private boolean deleteByCasKeyIfExpired(String casKey){
-
-        writeLock.lock();
-
-        var record = this.dataRecordIdContainer.get(casKey);
-
-        if(this.isExpired(record)){
-            this.delete(record.key());
             writeLock.unlock();
             return true;
         }
