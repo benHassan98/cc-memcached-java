@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 
 public class ReplaceCommand extends Command{
     @Override
-    public void excute(CommandRecord commandRecord, PrintWriter out) {
+    public void execute(CommandRecord commandRecord, PrintWriter out) {
 
         var res = this.cache.update(
                 commandRecord.key(),

@@ -3,17 +3,14 @@ package test;
 import cache.Cache;
 import command.*;
 import enums.CommandType;
-import org.apache.commons.collections4.Get;
 import org.junit.Test;
 import record.CommandRecord;
 import record.DataRecord;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 import static org.junit.Assert.assertEquals;
@@ -61,7 +58,7 @@ public class CommandTest {
         );
 
         StringWriter stringWriter = new StringWriter();
-        getCommand.excute(commandRecord, new PrintWriter(stringWriter));
+        getCommand.execute(commandRecord, new PrintWriter(stringWriter));
 
         List<String> resList = Arrays.asList(stringWriter.toString().split("\n"));
 
@@ -95,7 +92,7 @@ public class CommandTest {
         );
 
         StringWriter stringWriter = new StringWriter();
-        setCommand.excute(commandRecord, new PrintWriter(stringWriter));
+        setCommand.execute(commandRecord, new PrintWriter(stringWriter));
 
         String res = stringWriter.toString();
 
@@ -125,8 +122,8 @@ public class CommandTest {
 
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
-        addCommand.excute(commandRecord, printWriter);
-        addCommand.excute(commandRecord, printWriter);
+        addCommand.execute(commandRecord, printWriter);
+        addCommand.execute(commandRecord, printWriter);
 
         String[] res = stringWriter.toString().split("\n");
 
@@ -164,9 +161,9 @@ public class CommandTest {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        replaceCommand.excute(commandRecord, printWriter);
-        addCommand.excute(commandRecord, new PrintWriter(new StringWriter()));
-        replaceCommand.excute(commandRecord, printWriter);
+        replaceCommand.execute(commandRecord, printWriter);
+        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
+        replaceCommand.execute(commandRecord, printWriter);
 
 
         String[] res = stringWriter.toString().split("\n");
@@ -217,9 +214,9 @@ public class CommandTest {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        appendCommand.excute(commandRecord1, printWriter);
-        addCommand.excute(commandRecord1, new PrintWriter(new StringWriter()));
-        appendCommand.excute(commandRecord2, printWriter);
+        appendCommand.execute(commandRecord1, printWriter);
+        addCommand.execute(commandRecord1, new PrintWriter(new StringWriter()));
+        appendCommand.execute(commandRecord2, printWriter);
 
 
         String[] res = stringWriter.toString().split("\n");
@@ -270,9 +267,9 @@ public class CommandTest {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        prependCommand.excute(commandRecord1, printWriter);
-        addCommand.excute(commandRecord1, new PrintWriter(new StringWriter()));
-        prependCommand.excute(commandRecord2, printWriter);
+        prependCommand.execute(commandRecord1, printWriter);
+        addCommand.execute(commandRecord1, new PrintWriter(new StringWriter()));
+        prependCommand.execute(commandRecord2, printWriter);
 
 
         String[] res = stringWriter.toString().split("\n");
@@ -324,8 +321,8 @@ public class CommandTest {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        addCommand.excute(commandRecord, new PrintWriter(new StringWriter()));
-        incrementCommand.excute(commandRecord2, printWriter);
+        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
+        incrementCommand.execute(commandRecord2, printWriter);
 
 
         String res = stringWriter.toString();
@@ -376,8 +373,8 @@ public class CommandTest {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        addCommand.excute(commandRecord, new PrintWriter(new StringWriter()));
-        decrementCommand.excute(commandRecord2, printWriter);
+        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
+        decrementCommand.execute(commandRecord2, printWriter);
 
 
         String res = stringWriter.toString();
@@ -414,9 +411,9 @@ public class CommandTest {
         PrintWriter printWriter = new PrintWriter(stringWriter);
 
 
-        deleteCommand.excute(commandRecord, printWriter);
-        addCommand.excute(commandRecord, new PrintWriter(new StringWriter()));
-        deleteCommand.excute(commandRecord, printWriter);
+        deleteCommand.execute(commandRecord, printWriter);
+        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
+        deleteCommand.execute(commandRecord, printWriter);
 
 
         String[] res = stringWriter.toString().split("\n");

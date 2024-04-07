@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 
 public class GetsCommand extends Command{
     @Override
-    public void excute(CommandRecord commandRecord, PrintWriter out) {
+    public void execute(CommandRecord commandRecord, PrintWriter out) {
         this.cache.get(commandRecord.key()).ifPresent((v)->{
             out.print("VALUE "+commandRecord.key()+" "+v.flags()+" "+v.byteCount()+" "+v.casKey()+"\n");
             out.print(v.data()+"\n");

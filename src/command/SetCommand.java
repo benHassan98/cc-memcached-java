@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 
 public class SetCommand extends Command{
     @Override
-    public void excute(CommandRecord commandRecord, PrintWriter out) {
+    public void execute(CommandRecord commandRecord, PrintWriter out) {
 
         this.cache.set(
                 new DataRecord(

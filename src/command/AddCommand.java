@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 
 public class AddCommand extends Command{
     @Override
-    public void excute(CommandRecord commandRecord, PrintWriter out) {
+    public void execute(CommandRecord commandRecord, PrintWriter out) {
 
         var res = this.cache.add(
                 new DataRecord(

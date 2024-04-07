@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 
 public class DecrementCommand extends Command{
     @Override
-    public void excute(CommandRecord commandRecord, PrintWriter out) {
+    public void execute(CommandRecord commandRecord, PrintWriter out) {
         try{
 
             this.cache.update(commandRecord.key(),

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CasCommand extends Command{
     @Override
-    public void excute(CommandRecord commandRecord, PrintWriter out) {
+    public void execute(CommandRecord commandRecord, PrintWriter out) {
         AtomicBoolean validOp = new AtomicBoolean();
 
         this.cache.update(commandRecord.key(), (k, v)->{

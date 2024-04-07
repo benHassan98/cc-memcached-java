@@ -4,10 +4,7 @@ import cache.Cache;
 import factory.CommandFactory;
 import parser.Parser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 
 import java.util.ArrayList;
@@ -40,10 +37,13 @@ public class Server {
                 CompletableFuture
                         .completedFuture(serverSocket.accept())
                         .thenAcceptAsync((clientSocket)->{
+                            BufferedReader in;
+                            PrintWriter out;
                             System.out.println(clientSocket.getInetAddress()+" "+clientSocket.getPort()+" is Connected");
                             try {
-                                BufferedReader in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
-                                PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
+                                in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
+                                out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
+
                                 List<String> inputList = new ArrayList<>();
 
                                 while(!clientSocket.isClosed()){
@@ -52,16 +52,22 @@ public class Server {
                                     if("".equals(line.trim()))continue;
 
                                     inputList.add(line);
-                                    var commandRecord = parser.parse(inputList);
+                                    try{
+                                        var commandRecord = parser.parse(inputList);
 
-                                    if(!parser.hasNextLine(line)){
+                                        if(!parser.hasNextLine(line)){
 
+                                            inputList.clear();
+
+                                            var command = commandFactory.getCommandByType(commandRecord.commandType());
+                                            command.setCache(cache);
+                                            command.execute(commandRecord, out);
+
+                                        }
+                                    }
+                                    catch (Exception exception){
+                                        out.print(exception.getMessage()+"\n");
                                         inputList.clear();
-
-                                        var command = commandFactory.getCommandByType(commandRecord.commandType());
-                                        command.setCache(cache);
-                                        command.excute(commandRecord, out);
-
                                     }
 
 
@@ -72,9 +78,11 @@ public class Server {
                                 clientSocket.close();
 
 
-                            } catch (Exception exception) {
+                            } catch (IOException exception) {
                                 exception.printStackTrace();
+
                             }
+
 
 
                         });

@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 
 public class GetCommand extends Command{
     @Override
-    public void excute(CommandRecord commandRecord, PrintWriter out) {
+    public void execute(CommandRecord commandRecord, PrintWriter out) {
 
         commandRecord.keyList().forEach((key)->{
 
