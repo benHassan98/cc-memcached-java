@@ -228,15 +228,12 @@ public class Parser {
         );
     }
 
-    public boolean hasNextLine(String line) throws Exception {
-
-        if(line.trim().length() == 0)
-            return true;
+    public boolean hasNextLine(String line) {
 
         String commandName = line.split(" ")[0];
 
         if(!typeMap.containsKey(commandName)){
-            throw new Exception("Command not found");
+            return false;
         }
 
         return !List.of("get", "gets", "delete", "incr", "decr").contains(commandName);

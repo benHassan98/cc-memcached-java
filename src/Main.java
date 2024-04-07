@@ -83,6 +83,8 @@ public class Main {
             return;
         }
 
+        System.out.println("CC-Memcached Works on Port: "+port.get());
+        System.out.println("With "+cacheSize.get()+" byte Cache Size");
 
         Server server = new Server(cacheSize.get());
         server.start(port.get());

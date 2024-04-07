@@ -40,7 +40,7 @@ public class Server {
                 CompletableFuture
                         .completedFuture(serverSocket.accept())
                         .thenAcceptAsync((clientSocket)->{
-
+                            System.out.println(clientSocket.getInetAddress()+" "+clientSocket.getPort()+" is Connected");
                             try {
                                 BufferedReader in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
                                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
