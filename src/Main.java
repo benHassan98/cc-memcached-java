@@ -1,5 +1,6 @@
 import server.Server;
 
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -7,9 +8,9 @@ public class Main {
 
 
     public static boolean validateArgs(String[] args) {
-        int validCnt = 0;
-
         var argList = Arrays.asList(args);
+
+        int validCnt = 0;
         int portIndex = argList.indexOf("-p");
         int sizeIndex = argList.indexOf("-m");
 
@@ -50,7 +51,7 @@ public class Main {
         if(sizeIndex != -1 ){
 
             try{
-                Long size = Long.getLong(args[sizeIndex + 1]) * 1024L;
+                Long size = Long.parseLong(args[sizeIndex + 1]) * 1024L;
                 return Optional.of(size);
             }
             catch (NumberFormatException e){
@@ -64,9 +65,8 @@ public class Main {
     }
 
     public static void main(String[] args){
-        var argsValid = validateArgs(args);
 
-        if(!argsValid){
+        if(!validateArgs(args)){
             System.out.println("Unspecified Arguments");
             return;
         }
@@ -82,6 +82,7 @@ public class Main {
             System.out.println("Please Enter a valid Size");
             return;
         }
+
 
         Server server = new Server(cacheSize.get());
         server.start(port.get());
