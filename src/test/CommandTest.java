@@ -14,8 +14,8 @@ import java.util.List;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SuppressWarnings("All")
 public class CommandTest {
 
 
@@ -57,10 +57,9 @@ public class CommandTest {
                 null
         );
 
-        StringWriter stringWriter = new StringWriter();
-        getCommand.execute(commandRecord, new PrintWriter(stringWriter));
+        var res = getCommand.execute(commandRecord).get();
 
-        List<String> resList = Arrays.asList(stringWriter.toString().split("\n"));
+        List<String> resList = Arrays.asList(res.split("\n"));
 
 
         var val1 = resList.stream().filter(elem->List.of("Hello", "World").contains(elem)).toList().size();
@@ -91,10 +90,8 @@ public class CommandTest {
                 null
         );
 
-        StringWriter stringWriter = new StringWriter();
-        setCommand.execute(commandRecord, new PrintWriter(stringWriter));
 
-        String res = stringWriter.toString();
+        var res = setCommand.execute(commandRecord).get();
 
         assertEquals(res, "STORED\n");
 
@@ -120,15 +117,15 @@ public class CommandTest {
                 null
         );
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        addCommand.execute(commandRecord, printWriter);
-        addCommand.execute(commandRecord, printWriter);
 
-        String[] res = stringWriter.toString().split("\n");
+        String res = "";
+        res += addCommand.execute(commandRecord).get();
+        res += addCommand.execute(commandRecord).get();
 
-        assertEquals(res[0], "STORED");
-        assertEquals(res[1], "NOT_STORED");
+        String[] resArr = res.split("\n");
+
+        assertEquals(resArr[0], "STORED");
+        assertEquals(resArr[1], "NOT_STORED");
 
 
 
@@ -158,18 +155,17 @@ public class CommandTest {
                 null
         );
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        replaceCommand.execute(commandRecord, printWriter);
-        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
-        replaceCommand.execute(commandRecord, printWriter);
+        String res = "";
+        res += replaceCommand.execute(commandRecord).get();
+        addCommand.execute(commandRecord);
+        res += replaceCommand.execute(commandRecord).get();
 
 
-        String[] res = stringWriter.toString().split("\n");
+        String[] resArr = res.split("\n");
 
-        assertEquals(res[0], "NOT_STORED");
-        assertEquals(res[1], "STORED");
+        assertEquals(resArr[0], "NOT_STORED");
+        assertEquals(resArr[1], "STORED");
 
     }
 
@@ -211,18 +207,17 @@ public class CommandTest {
                 null
         );
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        appendCommand.execute(commandRecord1, printWriter);
-        addCommand.execute(commandRecord1, new PrintWriter(new StringWriter()));
-        appendCommand.execute(commandRecord2, printWriter);
+        String res = "";
+        res += appendCommand.execute(commandRecord1).get();
+        addCommand.execute(commandRecord1);
+        res += appendCommand.execute(commandRecord2).get();
 
 
-        String[] res = stringWriter.toString().split("\n");
+        String[] resArr = res.split("\n");
 
-        assertEquals(res[0], "NOT_STORED");
-        assertEquals(res[1], "STORED");
+        assertEquals(resArr[0], "NOT_STORED");
+        assertEquals(resArr[1], "STORED");
 
     }
 
@@ -266,16 +261,17 @@ public class CommandTest {
 
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
+        String res = "";
 
-        prependCommand.execute(commandRecord1, printWriter);
-        addCommand.execute(commandRecord1, new PrintWriter(new StringWriter()));
-        prependCommand.execute(commandRecord2, printWriter);
+        res += prependCommand.execute(commandRecord1).get();
+        addCommand.execute(commandRecord1);
+        res += prependCommand.execute(commandRecord2).get();
 
 
-        String[] res = stringWriter.toString().split("\n");
+        String[] resArr = res.split("\n");
 
-        assertEquals(res[0], "NOT_STORED");
-        assertEquals(res[1], "STORED");
+        assertEquals(resArr[0], "NOT_STORED");
+        assertEquals(resArr[1], "STORED");
 
 
     }
@@ -318,18 +314,13 @@ public class CommandTest {
         );
 
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
 
-        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
-        incrementCommand.execute(commandRecord2, printWriter);
+        String res = "";
 
-
-        String res = stringWriter.toString();
+        addCommand.execute(commandRecord);
+        res += incrementCommand.execute(commandRecord2).get();
 
         assertEquals(res, "60\n");
-
-
 
     }
 
@@ -369,15 +360,10 @@ public class CommandTest {
                 10L
         );
 
+        String res = "";
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-
-        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
-        decrementCommand.execute(commandRecord2, printWriter);
-
-
-        String res = stringWriter.toString();
+        addCommand.execute(commandRecord);
+        res += decrementCommand.execute(commandRecord2).get();
 
         assertEquals(res, "40\n");
 
@@ -407,19 +393,17 @@ public class CommandTest {
                 null
         );
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
+        String res = "";
+
+        res += deleteCommand.execute(commandRecord).get();
+        addCommand.execute(commandRecord);
+        res += deleteCommand.execute(commandRecord).get();
 
 
-        deleteCommand.execute(commandRecord, printWriter);
-        addCommand.execute(commandRecord, new PrintWriter(new StringWriter()));
-        deleteCommand.execute(commandRecord, printWriter);
+        String[] resArr = res.split("\n");
 
-
-        String[] res = stringWriter.toString().split("\n");
-
-        assertEquals(res[0], "NOT_FOUND");
-        assertEquals(res[1], "DELETED");
+        assertEquals(resArr[0], "NOT_FOUND");
+        assertEquals(resArr[1], "DELETED");
 
     }
 

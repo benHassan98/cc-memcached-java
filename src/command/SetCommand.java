@@ -3,11 +3,12 @@ package command;
 import record.CommandRecord;
 import record.DataRecord;
 
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.util.Optional;
 
 public class SetCommand extends Command{
     @Override
-    public void execute(CommandRecord commandRecord, PrintWriter out) {
+    public Optional<String> execute(CommandRecord commandRecord) {
 
         this.cache.set(
                 new DataRecord(
@@ -21,8 +22,8 @@ public class SetCommand extends Command{
         );
 
         if(commandRecord.reply()){
-            out.print("STORED\n");
+            return Optional.of("STORED\n");
         }
-
+        return Optional.empty();
     }
 }

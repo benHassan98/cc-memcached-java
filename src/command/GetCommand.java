@@ -2,23 +2,34 @@ package command;
 
 import record.CommandRecord;
 
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.util.Optional;
 
 public class GetCommand extends Command{
     @Override
-    public void execute(CommandRecord commandRecord, PrintWriter out) {
+    public Optional<String> execute(CommandRecord commandRecord) {
+
+        StringBuilder stringBuilder = new StringBuilder();
 
         commandRecord.keyList().forEach((key)->{
 
-            this.cache.get(key).ifPresent((v)->{
-                out.print("VALUE "+key+" "+v.flags()+" "+v.byteCount()+"\n");
-                out.print(v.data()+"\n");
-            });
-            out.print("END\n");
+            this.cache.get(key).ifPresent((v)->
+                    stringBuilder
+                            .append("VALUE ")
+                            .append(key)
+                            .append(" ")
+                            .append(v.flags())
+                            .append(" ")
+                            .append(v.byteCount())
+                            .append("\n")
+                            .append(v.data())
+                            .append("\n")
+            );
+            stringBuilder.append("END\n");
 
         });
 
-
+        return Optional.of(stringBuilder.toString());
 
     }
 }

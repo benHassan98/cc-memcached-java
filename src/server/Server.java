@@ -38,12 +38,12 @@ public class Server {
                         .completedFuture(serverSocket.accept())
                         .thenAcceptAsync((clientSocket)->{
                             BufferedReader in;
-                            PrintWriter out;
-                            System.out.println(clientSocket.getInetAddress()+" "+clientSocket.getPort()+" is Connected");
+                            OutputStream out;
+                            System.out.println(clientSocket.getInetAddress()+":"+clientSocket.getPort()+" is Connected");
                             try {
                                 in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
-                                out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
-
+                                out = clientSocket.getOutputStream();
+                                clientSocket.getOutputStream().write("".getBytes());
                                 List<String> inputList = new ArrayList<>();
 
                                 while(!clientSocket.isClosed()){
@@ -61,12 +61,17 @@ public class Server {
 
                                             var command = commandFactory.getCommandByType(commandRecord.commandType());
                                             command.setCache(cache);
-                                            command.execute(commandRecord, out);
+                                            var resOptional = command.execute(commandRecord);
+                                            if(resOptional.isPresent()){
+                                                out.write(resOptional.get().getBytes());
+                                            }
+                                            out.flush();
 
                                         }
                                     }
                                     catch (Exception exception){
-                                        out.print(exception.getMessage()+"\n");
+                                        out.write((exception.getMessage()+"\n").getBytes());
+                                        out.flush();
                                         inputList.clear();
                                     }
 
@@ -85,7 +90,8 @@ public class Server {
 
 
 
-                        });
+                        })
+                        ;
 
 
 
@@ -94,9 +100,7 @@ public class Server {
 
         }
         catch (IOException exception){
-
-            exception.printStackTrace();
-
+            System.out.println(exception.getMessage());
         }
 
 

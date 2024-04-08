@@ -3,15 +3,16 @@ package command;
 import record.CommandRecord;
 import record.DataRecord;
 
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.util.Optional;
 
 public class IncrementCommand extends Command{
     @Override
-    public void execute(CommandRecord commandRecord, PrintWriter out) {
+    public Optional<String> execute(CommandRecord commandRecord) {
 
         try{
 
-            this.cache.update(commandRecord.key(),
+            return this.cache.update(commandRecord.key(),
                     (k, v)-> {
                         long newData = Long.parseLong(v.data()) + commandRecord.delta();
                         return new DataRecord(
@@ -23,16 +24,13 @@ public class IncrementCommand extends Command{
                                 Long.toString(newData)
                         );
                     })
-                    .ifPresentOrElse((v)->{
-                        out.print(v.data()+"\n");
-                    },()->{
-                        out.print("NOT_FOUND\n");
-                    });
+                    .map(v->v.data()+"\n")
+                    .or(()->Optional.of("NOT_FOUND\n"));
 
         }
         catch (RuntimeException exception){
             exception.printStackTrace();
-            out.print("CLIENT_ERROR cannot increment non-numeric value\n");
+            return Optional.of("CLIENT_ERROR cannot increment non-numeric value\n");
         }
 
 

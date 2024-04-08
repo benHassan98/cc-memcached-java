@@ -3,15 +3,16 @@ package command;
 import record.CommandRecord;
 import record.DataRecord;
 
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CasCommand extends Command{
     @Override
-    public void execute(CommandRecord commandRecord, PrintWriter out) {
+    public Optional<String> execute(CommandRecord commandRecord) {
         AtomicBoolean validOp = new AtomicBoolean();
 
-        this.cache.update(commandRecord.key(), (k, v)->{
+        var res = this.cache.update(commandRecord.key(), (k, v)->{
             validOp.set(v.casKey().equals( commandRecord.casKey()));
             return !v.casKey().equals( commandRecord.casKey()) ? v:
                     new DataRecord(
@@ -25,25 +26,16 @@ public class CasCommand extends Command{
 
                 }
 
-        )
-                .ifPresentOrElse((v)->{
+        );
 
-                    if(commandRecord.reply()){
+        if(commandRecord.reply()){
 
-                        if(validOp.get()){
-                            out.print("STORED\n");
-                        }else{
-                            out.print("EXISTS\n");
-                        }
+            return res
+                    .map(v->validOp.get()?"STORED\n":"EXISTS\n")
+                    .or(()->Optional.of("NOT_FOUND\n"));
 
-                    }
+        }
 
-                },()->{
-
-                    if(commandRecord.reply()){
-                        out.print("NOT_FOUND\n");
-                    }
-
-                });
+        return Optional.empty();
     }
 }

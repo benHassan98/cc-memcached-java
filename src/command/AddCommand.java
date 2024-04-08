@@ -3,11 +3,11 @@ package command;
 import record.CommandRecord;
 import record.DataRecord;
 
-import java.io.PrintWriter;
+import java.util.Optional;
 
 public class AddCommand extends Command{
     @Override
-    public void execute(CommandRecord commandRecord, PrintWriter out) {
+    public Optional<String> execute(CommandRecord commandRecord) {
 
         var res = this.cache.add(
                 new DataRecord(
@@ -20,12 +20,11 @@ public class AddCommand extends Command{
                 )
         );
 
-        if(res && commandRecord.reply()){
-            out.print("STORED\n");
-        }else if (!res && commandRecord.reply()){
-            out.print("NOT_STORED\n");
+        if(commandRecord.reply()){
+            return res ? Optional.of("STORED\n"): Optional.of("NOT_STORED\n");
+
         }
 
-
+        return Optional.empty();
     }
 }

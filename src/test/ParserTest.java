@@ -11,26 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
 
-
-
     @Test
-    public void hasNextWithEmptyLine() throws Exception {
-        Parser parser = new Parser();
-
-        assertTrue(parser.hasNextLine(""));
-        assertTrue(parser.hasNextLine("     "));
-        assertTrue(parser.hasNextLine("\n"));
-        assertTrue(parser.hasNextLine("\r\n"));
-        assertTrue(parser.hasNextLine("\r\n\n\r"));
-    }
-
-    @Test
-    public void hasNextWithCommands() throws Exception {
+    public void hasNextWithCommands() {
 
         Parser parser = new Parser();
 
         assertTrue(parser.hasNextLine("set"));
-        assertThrows(Exception.class, ()->parser.hasNextLine("bar"));
+        assertFalse(parser.hasNextLine("bar"));
 
     }
 

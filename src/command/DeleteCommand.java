@@ -2,21 +2,18 @@ package command;
 
 import record.CommandRecord;
 
-import java.io.PrintWriter;
+import java.util.Optional;
 
 public class DeleteCommand extends Command{
     @Override
-    public void execute(CommandRecord commandRecord, PrintWriter out) {
+    public Optional<String> execute(CommandRecord commandRecord) {
 
         var res = this.cache.delete(commandRecord.key());
 
         if(commandRecord.reply()){
-            if(res){
-                out.print("DELETED\n");
-            }else{
-                out.print("NOT_FOUND\n");
-            }
-        }
+            return res ? Optional.of("DELETED\n"): Optional.of("NOT_FOUND\n");
 
+        }
+        return Optional.empty();
     }
 }

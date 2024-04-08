@@ -51,7 +51,7 @@ public class Main {
         if(sizeIndex != -1 ){
 
             try{
-                Long size = Long.parseLong(args[sizeIndex + 1]) * 1024L;
+                Long size = Long.parseLong(args[sizeIndex + 1]) * 1024L * 1024L;
                 return Optional.of(size);
             }
             catch (NumberFormatException e){
@@ -60,7 +60,7 @@ public class Main {
 
         }
 
-        return Optional.of(1024L);
+        return Optional.of(1024L * 1024L);
 
     }
 
