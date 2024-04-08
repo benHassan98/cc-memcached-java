@@ -21,7 +21,7 @@ public class AddCommand extends Command{
         );
 
         if(commandRecord.reply()){
-            return res ? Optional.of("STORED\n"): Optional.of("NOT_STORED\n");
+            return res ? Optional.of("STORED\r\n"): Optional.of("NOT_STORED\r\n");
 
         }
 

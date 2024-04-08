@@ -11,7 +11,7 @@ public class DeleteCommand extends Command{
         var res = this.cache.delete(commandRecord.key());
 
         if(commandRecord.reply()){
-            return res ? Optional.of("DELETED\n"): Optional.of("NOT_FOUND\n");
+            return res ? Optional.of("DELETED\r\n"): Optional.of("NOT_FOUND\r\n");
 
         }
         return Optional.empty();

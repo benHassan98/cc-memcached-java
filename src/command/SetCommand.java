@@ -22,7 +22,7 @@ public class SetCommand extends Command{
         );
 
         if(commandRecord.reply()){
-            return Optional.of("STORED\n");
+            return Optional.of("STORED\r\n");
         }
         return Optional.empty();
     }

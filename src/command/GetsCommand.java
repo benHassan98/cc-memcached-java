@@ -21,11 +21,11 @@ public class GetsCommand extends Command{
                         .append(v.byteCount())
                         .append(" ")
                         .append(v.casKey())
-                        .append("\n")
+                        .append("\r\n")
                         .append(v.data())
-                        .append("\n")
+                        .append("\r\n")
         );
-        stringBuilder.append("END\n");
+        stringBuilder.append("END\r\n");
 
         return Optional.of(stringBuilder.toString());
     }

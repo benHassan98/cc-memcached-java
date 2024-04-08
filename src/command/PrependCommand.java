@@ -20,8 +20,8 @@ public class PrependCommand extends Command{
                 ));
         if(commandRecord.reply()){
             return res
-                    .map(v->"STORED\n")
-                    .or(()->Optional.of("NOT_STORED\n"));
+                    .map(v->"STORED\r\n")
+                    .or(()->Optional.of("NOT_STORED\r\n"));
         }
         return Optional.empty();
     }

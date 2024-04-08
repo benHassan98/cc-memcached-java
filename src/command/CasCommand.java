@@ -31,8 +31,8 @@ public class CasCommand extends Command{
         if(commandRecord.reply()){
 
             return res
-                    .map(v->validOp.get()?"STORED\n":"EXISTS\n")
-                    .or(()->Optional.of("NOT_FOUND\n"));
+                    .map(v->validOp.get()?"STORED\r\n":"EXISTS\r\n")
+                    .or(()->Optional.of("NOT_FOUND\r\n"));
 
         }
 

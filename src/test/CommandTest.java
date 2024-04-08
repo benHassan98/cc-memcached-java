@@ -57,7 +57,7 @@ public class CommandTest {
 
         var res = getCommand.execute(commandRecord).get();
 
-        List<String> resList = Arrays.asList(res.split("\n"));
+        List<String> resList = Arrays.asList(res.split("\r\n"));
 
 
         var val1 = resList.stream().filter(elem->List.of("Hello", "World").contains(elem)).toList().size();
@@ -91,7 +91,7 @@ public class CommandTest {
 
         var res = setCommand.execute(commandRecord).get();
 
-        assertEquals(res, "STORED\n");
+        assertEquals(res, "STORED\r\n");
 
     }
 
@@ -120,7 +120,7 @@ public class CommandTest {
         res += addCommand.execute(commandRecord).get();
         res += addCommand.execute(commandRecord).get();
 
-        String[] resArr = res.split("\n");
+        String[] resArr = res.split("\r\n");
 
         assertEquals(resArr[0], "STORED");
         assertEquals(resArr[1], "NOT_STORED");
@@ -160,7 +160,7 @@ public class CommandTest {
         res += replaceCommand.execute(commandRecord).get();
 
 
-        String[] resArr = res.split("\n");
+        String[] resArr = res.split("\r\n");
 
         assertEquals(resArr[0], "NOT_STORED");
         assertEquals(resArr[1], "STORED");
@@ -212,7 +212,7 @@ public class CommandTest {
         res += appendCommand.execute(commandRecord2).get();
 
 
-        String[] resArr = res.split("\n");
+        String[] resArr = res.split("\r\n");
 
         assertEquals(resArr[0], "NOT_STORED");
         assertEquals(resArr[1], "STORED");
@@ -264,7 +264,7 @@ public class CommandTest {
         res += prependCommand.execute(commandRecord2).get();
 
 
-        String[] resArr = res.split("\n");
+        String[] resArr = res.split("\r\n");
 
         assertEquals(resArr[0], "NOT_STORED");
         assertEquals(resArr[1], "STORED");
@@ -316,7 +316,7 @@ public class CommandTest {
         addCommand.execute(commandRecord);
         res += incrementCommand.execute(commandRecord2).get();
 
-        assertEquals(res, "60\n");
+        assertEquals(res, "60\r\n");
 
     }
 
@@ -361,7 +361,7 @@ public class CommandTest {
         addCommand.execute(commandRecord);
         res += decrementCommand.execute(commandRecord2).get();
 
-        assertEquals(res, "40\n");
+        assertEquals(res, "40\r\n");
 
     }
 
@@ -396,7 +396,7 @@ public class CommandTest {
         res += deleteCommand.execute(commandRecord).get();
 
 
-        String[] resArr = res.split("\n");
+        String[] resArr = res.split("\r\n");
 
         assertEquals(resArr[0], "NOT_FOUND");
         assertEquals(resArr[1], "DELETED");

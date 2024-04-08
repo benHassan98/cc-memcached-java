@@ -43,7 +43,6 @@ public class Server {
                             try {
                                 in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
                                 out = clientSocket.getOutputStream();
-                                clientSocket.getOutputStream().write("".getBytes());
                                 List<String> inputList = new ArrayList<>();
 
                                 while(!clientSocket.isClosed()){

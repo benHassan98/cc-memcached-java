@@ -23,14 +23,14 @@ public class DecrementCommand extends Command{
                                         Long.toString(newData)
                                 );
                             })
-                    .map(v->v.data()+"\n")
-                    .or(()->Optional.of("NOT_FOUND\n"));
+                    .map(v->v.data()+"\r\n")
+                    .or(()->Optional.of("NOT_FOUND\r\n"));
 
 
         }
         catch (RuntimeException exception){
             exception.printStackTrace();
-            return Optional.of("CLIENT_ERROR cannot decrement non-numeric value\n");
+            return Optional.of("CLIENT_ERROR cannot decrement non-numeric value\r\n");
 
         }
 
