@@ -7,15 +7,13 @@ import org.junit.Test;
 import record.CommandRecord;
 import record.DataRecord;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("All")
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class CommandTest {
 
 
@@ -259,8 +257,6 @@ public class CommandTest {
                 null
         );
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
         String res = "";
 
         res += prependCommand.execute(commandRecord1).get();
